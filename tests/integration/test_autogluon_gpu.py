@@ -14,7 +14,7 @@ print("=" * 60)
 import os
 print("\nRunning GPU diagnostic...\n")
 root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-check_gpu_path = os.path.join(root_dir, 'check_gpu.py')
+check_gpu_path = os.path.join(root_dir, 'scripts', 'check_gpu.py')
 with open(check_gpu_path, 'r', encoding='utf-8') as f:
     exec(f.read())
 

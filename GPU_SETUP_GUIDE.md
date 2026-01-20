@@ -56,7 +56,7 @@ model = UniversalForecaster(
 
 ### Step 1: Run GPU Diagnostic
 ```python
-%run check_gpu.py
+%run scripts/check_gpu.py
 ```
 
 This will check:
@@ -67,7 +67,8 @@ This will check:
 
 ### Step 2: Test AutoGluon with GPU
 ```python
-%run test_autogluon_gpu.py
+# From project root
+pytest tests/integration/test_autogluon_gpu.py
 ```
 
 This will:
@@ -79,7 +80,7 @@ This will:
 ## Common Issues & Fixes
 
 ### Issue 1: PyTorch doesn't have CUDA support
-**Symptom:** `check_gpu.py` shows "CUDA not available in PyTorch"
+**Symptom:** `scripts/check_gpu.py` shows "CUDA not available in PyTorch"
 
 **Fix:** Install CUDA-enabled PyTorch
 ```bash
@@ -96,7 +97,7 @@ nvidia-smi  # Look for "CUDA Version: X.X"
 ```
 
 ### Issue 2: MXNet doesn't have GPU support
-**Symptom:** `check_gpu.py` shows "MXNet cannot access GPU"
+**Symptom:** `scripts/check_gpu.py` shows "MXNet cannot access GPU"
 
 **Fix:** Install GPU-enabled MXNet
 ```bash
@@ -141,8 +142,8 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 ## After Installing GPU Packages
 
 1. **Restart Jupyter kernel** (Kernel → Restart Kernel)
-2. **Re-run diagnostic:** `%run check_gpu.py`
-3. **Test AutoGluon:** `%run test_autogluon_gpu.py`
+2. **Re-run diagnostic:** `%run scripts/check_gpu.py`
+3. **Test AutoGluon:** `pytest tests/integration/test_autogluon_gpu.py`
 
 ## Verification
 

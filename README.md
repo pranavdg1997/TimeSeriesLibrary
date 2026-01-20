@@ -45,7 +45,7 @@ pip install universal-ts[all]
 #### GPU Environment Setup (RTX 50-series/Universal)
 If you have a modern NVIDIA GPU (like the RTX 5080), run our setup script to create a compatible `ts_gpu` environment:
 ```powershell
-.\setup_gpu_env.ps1
+.\scripts\setup_gpu_env.ps1
 ```
 
 ## Quick Start

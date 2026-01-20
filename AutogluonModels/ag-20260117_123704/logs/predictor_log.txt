@@ -1,0 +1,34 @@
+Beginning AutoGluon training... Time limit = 10s
+AutoGluon will save models to 'C:\more ML\TimeSeriesLibrary\AutogluonModels\ag-20260117_123704'
+=================== System Info ===================
+AutoGluon Version:  1.5.0
+Python Version:     3.12.12
+Operating System:   Windows
+Platform Machine:   AMD64
+Platform Version:   10.0.26200
+CPU Count:          24
+Pytorch Version:    2.6.0+cu124
+CUDA Version:       12.4
+GPU Memory:         GPU 0: 15.92/15.92 GB
+Total GPU Memory:   Free: 15.92 GB, Allocated: 0.00 GB, Total: 15.92 GB
+GPU Count:          1
+Memory Avail:       17.48 GB / 31.06 GB (56.3%)
+Disk Space Avail:   1399.38 GB / 1832.52 GB (76.4%)
+===================================================
+
+Fitting with arguments:
+{'enable_ensemble': True,
+ 'eval_metric': WQL,
+ 'hyperparameters': 'default',
+ 'known_covariates_names': [],
+ 'num_val_windows': 1,
+ 'prediction_length': 5,
+ 'quantile_levels': [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+ 'random_seed': 123,
+ 'refit_every_n_windows': 1,
+ 'refit_full': False,
+ 'skip_model_selection': False,
+ 'target': 'target',
+ 'time_limit': 10,
+ 'verbosity': 2}
+

@@ -1,0 +1,273 @@
+Metadata-Version: 2.4
+Name: universal-ts
+Version: 0.1.0
+Summary: Universal time series forecasting with multiple backend support
+Author: Time Series Team
+License: MIT
+Project-URL: Homepage, https://github.com/yourusername/universal-ts
+Project-URL: Documentation, https://github.com/yourusername/universal-ts
+Project-URL: Repository, https://github.com/yourusername/universal-ts
+Keywords: time-series,forecasting,prophet,autogluon,sktime,darts
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pandas>=1.3.0
+Requires-Dist: numpy>=1.20.0
+Requires-Dist: holidays>=0.20
+Requires-Dist: matplotlib>=3.3.0
+Provides-Extra: prophet
+Requires-Dist: prophet>=1.1; extra == "prophet"
+Provides-Extra: autogluon
+Requires-Dist: autogluon.timeseries>=0.8.0; extra == "autogluon"
+Requires-Dist: torch>=1.13.0; extra == "autogluon"
+Provides-Extra: sktime
+Requires-Dist: sktime>=0.20.0; extra == "sktime"
+Provides-Extra: darts
+Requires-Dist: darts>=0.24.0; extra == "darts"
+Requires-Dist: torch>=1.13.0; extra == "darts"
+Provides-Extra: all
+Requires-Dist: prophet>=1.1; extra == "all"
+Requires-Dist: autogluon.timeseries>=0.8.0; extra == "all"
+Requires-Dist: sktime>=0.20.0; extra == "all"
+Requires-Dist: darts>=0.24.0; extra == "all"
+Requires-Dist: torch>=1.13.0; extra == "all"
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0; extra == "dev"
+Requires-Dist: pytest-cov>=3.0; extra == "dev"
+Requires-Dist: black>=22.0; extra == "dev"
+Requires-Dist: flake8>=4.0; extra == "dev"
+Requires-Dist: isort>=5.0; extra == "dev"
+Dynamic: license-file
+
+# Universal Time Series Forecasting Library
+
+A unified Python library for time series forecasting with a **Prophet-like interface** supporting multiple backends (Prophet, AutoGluon, sktime, Darts).
+
+## Features
+
+- 🎯 **Unified API**: Prophet-like interface across all backends
+- 📊 **Multiple Backends**: Prophet, AutoGluon, sktime, Darts
+- 🔄 **Panel Data Support**: Forecast multiple series simultaneously
+- 📅 **Holiday Features**: Built-in US/UK holidays (extensible)
+- 📈 **Comprehensive Metrics**: MAE, RMSE, MAPE, sMAPE, MASE, coverage
+- 🧪 **Well-Tested**: Extensive unit and integration tests
+
+## Installation
+
+### Base Installation
+```bash
+pip install universal-ts
+```
+
+### With Specific Backends
+```bash
+# Prophet
+pip install universal-ts[prophet]
+
+# AutoGluon
+pip install universal-ts[autogluon]
+
+# sktime
+pip install universal-ts[sktime]
+
+# Darts
+pip install universal-ts[darts]
+
+# All backends
+pip install universal-ts[all]
+```
+
+## Quick Start
+
+### Single Series Forecasting
+
+```python
+import pandas as pd
+from universal_ts import UniversalForecaster
+
+# Prepare your data
+df = pd.DataFrame({
+    'ds': pd.date_range('2020-01-01', periods=100, freq='D'),
+    'y': range(100)  # Your target values
+})
+
+# Create and fit model
+model = UniversalForecaster(backend='prophet')
+model.fit(df)
+
+# Generate forecasts
+forecast = model.predict(horizon=30)
+print(forecast.head())
+```
+
+### Panel Data Forecasting
+
+```python
+# Data with multiple series
+df = pd.DataFrame({
+    'store_id': ['A', 'A', 'A', 'B', 'B', 'B'],
+    'ds': pd.date_range('2020-01-01', periods=3).tolist() * 2,
+    'y': [10, 11, 12, 20, 21, 22]
+})
+
+# Fit with group identifier
+model = UniversalForecaster(backend='autogluon', prediction_length=10)
+model.fit(df, group_id='store_id')
+
+# Forecast for all series
+forecast = model.predict(horizon=10)
+```
+
+### With Holiday Features
+
+```python
+model = UniversalForecaster(
+    backend='prophet',
+    country_holidays=['US', 'UK']
+)
+model.fit(df)
+forecast = model.predict(horizon=30)
+```
+
+### Evaluation
+
+```python
+from universal_ts import evaluate
+
+results = evaluate(
+    ground_truth=test_df,
+    forecast=forecast_df,
+    metrics=['mae', 'rmse', 'mape'],
+    group_id_col='store_id'  # Optional, for panel data
+)
+print(results)
+```
+
+## Supported Backends
+
+| Backend | Panel Data | Covariates | Probabilistic | Models |
+|---------|-----------|------------|---------------|---------|
+| **Prophet** | ✅ (via separate models) | ✅ | ✅ | Prophet |
+| **AutoGluon** | ✅ (native) | ✅ | ✅ | Ensemble of multiple models (GPU supported) |
+| **sktime** | ✅ (via separate models) | ✅ | Partial | NaiveForecaster, AutoETS, AutoARIMA |
+| **Darts** | ✅ (via separate models) | ✅ | Partial | NaiveSeasonal, ARIMA, ExponentialSmoothing |
+
+## API Reference
+
+### UniversalForecaster
+
+```python
+UniversalForecaster(
+    backend='prophet',           # Backend to use
+    freq=None,                   # Time series frequency
+    country_holidays=None,       # Holiday countries
+    **backend_kwargs             # Backend-specific args
+)
+```
+
+**Methods:**
+- `fit(df, group_id=None, **kwargs)`: Fit the model
+- `predict(horizon, df_future=None, **kwargs)`: Generate forecasts
+- `add_regressor(name, **kwargs)`: Add a covariate
+- `add_seasonality(name, period, fourier_order, **kwargs)`: Add custom seasonality
+- `get_model_info()`: Get model metadata
+
+### Metrics
+
+```python
+from universal_ts import mae, mse, rmse, mape, smape, mase, coverage, evaluate
+
+# Individual metrics
+error = mae(y_true, y_pred)
+
+# Comprehensive evaluation
+results = evaluate(ground_truth, forecast, metrics=['mae', 'rmse', 'mape'])
+```
+
+## Data Format
+
+Your DataFrame must have:
+- `ds`: datetime column (will be converted if string)
+- `y`: numeric target values
+- Optional: `group_id` for panel data
+- Optional: additional columns for covariates
+
+## Examples
+
+See the `examples/` directory for complete examples:
+- `quickstart_prophet.py`: Single series with Prophet
+- `quickstart_autogluon_panel.py`: Panel data with AutoGluon
+
+## Development
+
+```bash
+# Clone repository
+git clone https://github.com/yourusername/universal-ts.git
+cd universal-ts
+
+# Install in development mode
+pip install -e ".[dev]"
+
+# Run tests
+pytest tests/
+
+# Run with coverage
+pytest tests/ --cov=universal_ts --cov-report=html
+```
+
+## Roadmap
+
+**v1.0** (Current):
+- ✅ Core API with 4 backends
+- ✅ Panel data support
+- ✅ Holiday features (US/UK)
+- ✅ Comprehensive metrics
+- ✅ Unit and integration tests
+
+**v2.0** (Planned):
+- 📊 Visualization and plotting
+- 🔍 Hyperparameter tuning utilities
+- 🌍 More holiday calendars
+- 🧠 Deep learning backends (PyTorch Forecasting)
+- 📦 Model persistence and deployment
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+MIT License - see LICENSE file for details.
+
+## Citation
+
+If you use this library in your research, please cite:
+
+```bibtex
+@software{universal_ts,
+  title = {Universal Time Series: A Unified Forecasting Library},
+  author = {Your Name},
+  year = {2026},
+  url = {https://github.com/yourusername/universal-ts}
+}
+```
+
+## Acknowledgments
+
+This library builds upon the excellent work of:
+- [Prophet](https://facebook.github.io/prophet/) by Facebook
+- [AutoGluon](https://auto.gluon.ai/) by Amazon
+- [sktime](https://www.sktime.net/) by sktime developers
+- [Darts](https://unit8co.github.io/darts/) by Unit8
+- [python-holidays](https://github.com/dr-prodigy/python-holidays) for holiday calendars

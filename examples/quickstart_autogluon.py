@@ -4,26 +4,21 @@ import pandas as pd
 import numpy as np
 from universal_ts import UniversalForecaster, evaluate
 
-# Create synthetic daily data
-np.random.seed(42)
-dates = pd.date_range('2020-01-01', periods=365, freq='D')
-trend = np.arange(365) * 0.1
-seasonality = 10 * np.sin(2 * np.pi * np.arange(365) / 7)  # Weekly seasonality
-noise = np.random.normal(0, 2, 365)
-values = 100 + trend + seasonality + noise
-
-df = pd.DataFrame({
-    'ds': dates,
-    'y': values
-})
+# Load Shampoo Sales dataset
+from sktime.datasets import load_shampoo_sales
+print("Loading Shampoo Sales dataset...")
+y = load_shampoo_sales()
+df = pd.DataFrame({'ds': y.index.to_timestamp(), 'y': y.values})
 
 print("Data shape:", df.shape)
 print("\nFirst few rows:")
 print(df.head())
 
 # Split into train and test
-train = df[df['ds'] < '2020-11-01']
-test = df[df['ds'] >= '2020-11-01']
+# Split into train and test
+test_size = 5
+train = df.iloc[:-test_size]
+test = df.iloc[-test_size:]
 
 print(f"\nTrain size: {len(train)}, Test size: {len(test)}")
 

@@ -4,26 +4,21 @@ import pandas as pd
 import numpy as np
 from universal_ts import UniversalForecaster, evaluate
 
-# Create synthetic daily data
-np.random.seed(42)
-dates = pd.date_range('2020-01-01', periods=365, freq='D')
-trend = np.arange(365) * 0.1
-seasonality = 10 * np.sin(2 * np.pi * np.arange(365) / 7)  # Weekly seasonality
-noise = np.random.normal(0, 2, 365)
-values = 100 + trend + seasonality + noise
-
-df = pd.DataFrame({
-    'ds': dates,
-    'y': values
-})
+# Load Peyton Manning dataset (standard Prophet example)
+print("Downloading Peyton Manning dataset...")
+data_url = 'https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv'
+df = pd.read_csv(data_url)
+df['ds'] = pd.to_datetime(df['ds'])
 
 print("Data shape:", df.shape)
 print("\nFirst few rows:")
 print(df.head())
 
 # Split into train and test
-train = df[df['ds'] < '2020-11-01']
-test = df[df['ds'] >= '2020-11-01']
+# Split into train and test
+test_size = 365
+train = df.iloc[:-test_size]
+test = df.iloc[-test_size:]
 
 print(f"\nTrain size: {len(train)}, Test size: {len(test)}")
 

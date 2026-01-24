@@ -1,2 +1,4 @@
 *.ipynb
 test.ipynb
+*.pkl
+/AutogluonModels

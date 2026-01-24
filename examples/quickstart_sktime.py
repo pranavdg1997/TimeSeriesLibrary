@@ -4,18 +4,12 @@ import pandas as pd
 import numpy as np
 from universal_ts import UniversalForecaster, evaluate
 
-# Create synthetic daily data
-np.random.seed(42)
-dates = pd.date_range('2020-01-01', periods=200, freq='D')
-trend = np.arange(200) * 0.05
-seasonality = 5 * np.sin(2 * np.pi * np.arange(200) / 7)
-noise = np.random.normal(0, 1, 200)
-values = 50 + trend + seasonality + noise
-
-df = pd.DataFrame({
-    'ds': dates,
-    'y': values
-})
+# Load Airline passengers dataset
+from sktime.datasets import load_airline
+print("Loading Airline passengers dataset...")
+y = load_airline()
+# Convert to Month End for sktime compatibility
+df = pd.DataFrame({'ds': y.index.to_timestamp().to_period('M').to_timestamp('M'), 'y': y.values})
 
 print("Data shape:", df.shape)
 

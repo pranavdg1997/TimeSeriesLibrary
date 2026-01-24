@@ -8,18 +8,12 @@ from universal_ts import UniversalForecaster, evaluate
 # Suppress some common warnings from Darts/PyTorch
 warnings.filterwarnings("ignore")
 
-# Create synthetic daily data
-np.random.seed(42)
-dates = pd.date_range('2020-01-01', periods=365, freq='D')
-trend = np.arange(365) * 0.1
-seasonality = 10 * np.sin(2 * np.pi * np.arange(365) / 7)
-noise = np.random.normal(0, 2, 365)
-values = 100 + trend + seasonality + noise
-
-df = pd.DataFrame({
-    'ds': dates,
-    'y': values
-})
+# Load Air Passengers dataset
+from darts.datasets import AirPassengersDataset
+print("Loading Air Passengers dataset...")
+series = AirPassengersDataset().load()
+df = series.to_dataframe().reset_index()
+df.columns = ['ds', 'y']
 
 # Split into train and test
 train = df.iloc[:-30]

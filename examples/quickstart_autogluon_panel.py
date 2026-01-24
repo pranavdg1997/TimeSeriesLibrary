@@ -4,30 +4,16 @@ import pandas as pd
 import numpy as np
 from universal_ts import UniversalForecaster, evaluate
 
-# Create synthetic panel data (multiple stores)
-np.random.seed(42)
-n_stores = 3
-n_days = 180
-data = []
-
-for store_id in range(n_stores):
-    dates = pd.date_range('2020-01-01', periods=n_days, freq='D')
-    
-    # Each store has different trend and base level
-    base = 100 + store_id * 50
-    trend = np.arange(n_days) * (0.2 + store_id * 0.1)
-    seasonality = 15 * np.sin(2 * np.pi * np.arange(n_days) / 7)
-    noise = np.random.normal(0, 5, n_days)
-    values = base + trend + seasonality + noise
-    
-    store_df = pd.DataFrame({
-        'store_id': f'store_{store_id}',
-        'ds': dates,
-        'y': values
-    })
-    data.append(store_df)
-
-df = pd.concat(data, ignore_index=True)
+# Load M4 Daily Dataset (Subset)
+print("Downloading M4 Daily dataset (subset)...")
+data_url = "https://autogluon.s3.amazonaws.com/datasets/timeseries/m4_daily_subset/train.csv"
+df = pd.read_csv(data_url)
+# The dataset has columns: item_id, timestamp, target
+df = df.rename(columns={'item_id': 'store_id', 'timestamp': 'ds', 'target': 'y'})
+# Filter to just a few items for quicker demonstration
+selected_ids = df['store_id'].unique()[:3]
+df = df[df['store_id'].isin(selected_ids)].copy()
+df['ds'] = pd.to_datetime(df['ds'])
 
 print("Panel data shape:", df.shape)
 print(f"Number of stores: {df['store_id'].nunique()}")
@@ -35,8 +21,10 @@ print("\nFirst few rows:")
 print(df.head())
 
 # Split into train and test
-train = df[df['ds'] < '2020-05-01']
-test = df[df['ds'] >= '2020-05-01']
+# Split into train and test
+prediction_length = 30
+train = df.groupby('store_id').apply(lambda x: x.iloc[:-prediction_length]).reset_index(drop=True)
+test = df.groupby('store_id').apply(lambda x: x.iloc[-prediction_length:]).reset_index(drop=True)
 
 print(f"\nTrain size: {len(train)}, Test size: {len(test)}")
 

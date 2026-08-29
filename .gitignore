@@ -2,3 +2,8 @@
 test.ipynb
 *.pkl
 /AutogluonModels
+
+# AutoGluon generated logs
+AutogluonModels/**/logs/
+AutogluonModels/**/lightning_logs/
+AutogluonModels/**/events.out.tfevents.*

@@ -1,0 +1,24 @@
+# GPU-specific requirements
+-r requirements.txt
+
+# PyTorch with CUDA support (adjust CUDA version as needed)
+# For CUDA 11.8
+# torch==2.0.1+cu118 --find-links https://download.pytorch.org/whl/torch_stable.html
+# torchvision==0.15.2+cu118 --find-links https://download.pytorch.org/whl/torch_stable.html
+# torchaudio==2.0.2+cu118 --find-links https://download.pytorch.org/whl/torch_stable.html
+
+# For CUDA 12.1 (recommended)
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# Alternative: Install via PyTorch index (recommended)
+# torch>=1.13.0 --index-url https://download.pytorch.org/whl/cu121
+# torchvision>=0.14.0 --index-url https://download.pytorch.org/whl/cu121
+# torchaudio>=0.13.0 --index-url https://download.pytorch.org/whl/cu121
+
+# For RTX 50-series (CUDA 12.4+)
+# torch>=2.1.0 --index-url https://download.pytorch.org/whl/cu124
+# torchvision>=0.16.0 --index-url https://download.pytorch.org/whl/cu124
+# torchaudio>=2.1.0 --index-url https://download.pytorch.org/whl/cu124

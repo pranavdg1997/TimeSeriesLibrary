@@ -1,0 +1,37 @@
+FROM nvidia/cuda:12.1-devel-ubuntu22.04
+
+# Install Python and system dependencies
+RUN apt-get update && apt-get install -y \
+    python3.11 \
+    python3.11-pip \
+    python3.11-dev \
+    git \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create symbolic link for python
+RUN ln -s /usr/bin/python3.11 /usr/bin/python
+RUN ln -s /usr/bin/pip3 /usr/bin/pip
+
+# Upgrade pip
+RUN pip install --upgrade pip
+
+# Set working directory
+WORKDIR /app
+
+# Copy project files
+COPY . .
+
+# Install PyTorch with CUDA support
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# Install package in development mode with all dependencies
+RUN pip install -e ".[dev,all]"
+
+# Set environment variables
+ENV CUDA_VISIBLE_DEVICES=all
+ENV PYTHONPATH=/app
+
+# Default command
+CMD ["bash"]

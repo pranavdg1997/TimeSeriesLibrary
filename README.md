@@ -19,12 +19,27 @@ A unified Python library for time series forecasting with a **Prophet-like inter
 
 ## Installation
 
-### Base Installation
+**⚠️ Important: This library is not yet published to PyPI. Please install from source using the instructions below.**
+
+### Development Installation (Recommended)
 ```bash
-pip install universal-ts
+# Clone the repository
+git clone https://github.com/yourusername/universal-ts.git
+cd universal-ts
+
+# Create and activate conda environment (recommended)
+conda create -n universal-ts python=3.11 -y
+conda activate universal-ts
+
+# Install in development mode
+pip install -e ".[dev,all]"
+
+# Or install specific backends only
+pip install -e ".[dev]" prophet sktime darts
+pip install autogluon.timeseries
 ```
 
-### With Specific Backends
+### Future PyPI Installation (When Published)
 ```bash
 # Prophet
 pip install universal-ts[prophet]
@@ -140,6 +155,72 @@ pip install -e ".[dev]"
 # Run tests
 pytest tests/
 ```
+
+## 🙏 Acknowledgments & Attribution
+
+This library is built upon excellent open-source time series forecasting libraries. We extend our sincere gratitude to their developers and communities:
+
+### Core Backend Libraries
+
+**[Prophet](https://github.com/facebook/prophet)**
+- Copyright: Facebook (Meta)
+- License: MIT License
+- Used for: Business-friendly forecasting with holidays, trend analysis
+
+**[AutoGluon-TimeSeries](https://github.com/autogluon/autogluon)**
+- Copyright: Amazon Web Services
+- License: Apache License 2.0
+- Used for: Automated machine learning, ensemble methods, deep learning models
+
+**[sktime](https://github.com/sktime/sktime)**
+- Copyright: sktime developers
+- License: BSD 3-Clause License
+- Used for: Statistical forecasting, traditional time series models
+
+**[Darts](https://github.com/unit8co/darts)**
+- Copyright: Unit8
+- License: Apache License 2.0
+- Used for: Deep learning models, advanced forecasting architectures
+
+### Supporting Libraries
+
+**[PyTorch](https://github.com/pytorch/pytorch)**
+- Copyright: PyTorch developers and various contributors
+- License: BSD-style license
+- Used for: GPU acceleration, deep learning backend
+
+**[pandas](https://github.com/pandas-dev/pandas)**
+- Copyright: PyData Development Team
+- License: BSD 3-Clause License
+- Used for: Data manipulation and time series handling
+
+**[NumPy](https://github.com/numpy/numpy)**
+- Copyright: NumPy developers
+- License: BSD License
+- Used for: Numerical computations, array operations
+
+**[holidays](https://github.com/dr-prodigy/python-holidays)**
+- License: MIT License
+- Used for: Holiday calendar features and date handling
+
+### Library Integration Philosophy
+
+This library follows the **wrapper/adapter pattern**, providing a unified interface while preserving the unique strengths of each backend:
+
+- **No reinvention**: We leverage existing, battle-tested implementations
+- **Best practices**: Each backend maintains its own optimization and parameter tuning
+- **Choice**: Users can select the best tool for their specific use case
+- **Compatibility**: Existing code for these libraries remains directly usable
+
+### License Compliance
+
+This library is released under the **MIT License** and is compatible with all included backend licenses:
+
+- ✅ MIT License (Prophet, holidays, this library)
+- ✅ Apache 2.0 (AutoGluon, Darts)
+- ✅ BSD 3-Clause (sktime, pandas, NumPy)
+
+All attribution and license notices are preserved in our documentation and code comments.
 
 ## License
 

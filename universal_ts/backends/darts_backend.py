@@ -24,9 +24,9 @@ from ..utils import detect_gpu
 class DartsBackend(BaseBackendModel):
     """
     Darts backend for time series forecasting.
-    
+
     Provides access to Darts forecasting models via a simple registry.
-    
+
     Parameters
     ----------
     model : str, default="naive_seasonal"
@@ -36,7 +36,7 @@ class DartsBackend(BaseBackendModel):
     **kwargs
         Additional backend configuration
     """
-    
+
     # Model registry
     MODEL_REGISTRY = {
         "naive_seasonal": NaiveSeasonal if DARTS_AVAILABLE else None,
@@ -45,10 +45,10 @@ class DartsBackend(BaseBackendModel):
         "tide": TiDEModel if DARTS_AVAILABLE else None,
         "nbeats": NBEATSModel if DARTS_AVAILABLE else None,
     }
-    
+
     # DL models that support GPU
     DL_MODELS = ["tide", "nbeats"]
-    
+
     def __init__(
         self,
         model: str = "naive_seasonal",
@@ -60,29 +60,29 @@ class DartsBackend(BaseBackendModel):
             raise BackendNotInstalledError(
                 "Darts is not installed. Install with: pip install universal-ts[darts]"
             )
-        
+
         super().__init__(**kwargs)
         self.model_name = model
         self.model_kwargs = model_kwargs or {}
-        
+
         # Merge extra kwargs into model_kwargs
         self.model_kwargs.update(kwargs)
         self.models: Dict[str, Any] = {}  # For panel data: group_id -> model
         self.is_panel = False
-        
+
         # Validate model name
         if model not in self.MODEL_REGISTRY:
             raise ValueError(
                 f"Unknown model '{model}'. "
                 f"Available: {list(self.MODEL_REGISTRY.keys())}"
             )
-            
+
         # GPU configuration for DL models
         if model in self.DL_MODELS:
             if num_gpus is None:
                 num_gpus = detect_gpu()
             self.num_gpus = num_gpus
-            
+
             if self.num_gpus > 0:
                 print(f"[darts] Using GPU for model '{model}'")
                 # Add Lightning trainer kwargs for GPU
@@ -97,7 +97,7 @@ class DartsBackend(BaseBackendModel):
                      print(f"[darts] GPU requested but none detected or compatible. Falling back to CPU for '{model}'.")
                 else:
                      print(f"[darts] Using CPU for model '{model}'")
-                
+
                 # Explicitly disable GPU to avoid auto-detection by Lightning
                 if 'pl_trainer_kwargs' not in self.model_kwargs:
                     self.model_kwargs['pl_trainer_kwargs'] = {}
@@ -106,7 +106,7 @@ class DartsBackend(BaseBackendModel):
                 })
         else:
             self.num_gpus = 0
-    
+
     def fit(
         self,
         df: pd.DataFrame,
@@ -116,9 +116,9 @@ class DartsBackend(BaseBackendModel):
     ) -> None:
         """
         Fit Darts model(s).
-        
+
         For panel data, fits separate models for each series.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
@@ -133,20 +133,20 @@ class DartsBackend(BaseBackendModel):
         self.group_id_col = group_id_col
         self.is_panel = group_id_col is not None
         self.covariates = covariates or []
-        
+
         if self.is_panel:
             # Fit separate model for each group
             for group_id, group_df in df.groupby(group_id_col):
                 model = self._create_model()
-                
+
                 # Convert to Darts TimeSeries
                 series = self._convert_to_timeseries(group_df)
-                
+
                 # Prepare covariates if any
                 covariates_ts = None
                 if self.covariates:
                     covariates_ts = self._convert_covariates_to_timeseries(group_df)
-                
+
                 # Fit model
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
@@ -159,20 +159,20 @@ class DartsBackend(BaseBackendModel):
                             model.fit(series, **kwargs)
                     else:
                         model.fit(series, **kwargs)
-                
+
                 self.models[str(group_id)] = model
         else:
             # Single series
             model = self._create_model()
-            
+
             # Convert to Darts TimeSeries
             series = self._convert_to_timeseries(df)
-            
+
             # Prepare covariates if any
             covariates_ts = None
             if self.covariates:
                 covariates_ts = self._convert_covariates_to_timeseries(df)
-            
+
             # Fit model
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
@@ -183,19 +183,26 @@ class DartsBackend(BaseBackendModel):
                         model.fit(series, **kwargs)
                 else:
                     model.fit(series, **kwargs)
-            
+
             self.models['_single_'] = model
-        
+
         self.is_fitted = True
-        
+
         # Infer frequency
         self.freq = pd.infer_freq(df['ds'])
-    
+
     def _create_model(self) -> Any:
         """Create a new Darts model instance."""
         model_class = self.MODEL_REGISTRY[self.model_name]
-        return model_class(**self.model_kwargs)
-    
+
+        # Remove unsupported parameters
+        model_kwargs = self.model_kwargs.copy()
+        if 'verbosity' in model_kwargs:
+            # Convert verbosity to verbose for Darts
+            model_kwargs['verbose'] = model_kwargs.pop('verbosity')
+
+        return model_class(**model_kwargs)
+
     def _convert_to_timeseries(self, df: pd.DataFrame) -> TimeSeries:
         """Convert DataFrame to Darts TimeSeries."""
         return TimeSeries.from_dataframe(
@@ -203,18 +210,18 @@ class DartsBackend(BaseBackendModel):
             time_col='ds',
             value_cols='y'
         )
-    
+
     def _convert_covariates_to_timeseries(self, df: pd.DataFrame) -> TimeSeries:
         """Convert covariate columns to Darts TimeSeries."""
         if not self.covariates:
             return None
-        
+
         return TimeSeries.from_dataframe(
             df[['ds'] + self.covariates],
             time_col='ds',
             value_cols=self.covariates
         )
-    
+
     def predict(
         self,
         horizon: int,
@@ -223,7 +230,7 @@ class DartsBackend(BaseBackendModel):
     ) -> pd.DataFrame:
         """
         Generate forecasts using Darts.
-        
+
         Parameters
         ----------
         horizon : int
@@ -232,7 +239,7 @@ class DartsBackend(BaseBackendModel):
             Future covariates
         **kwargs
             Additional predict parameters
-            
+
         Returns
         -------
         pd.DataFrame
@@ -240,9 +247,9 @@ class DartsBackend(BaseBackendModel):
         """
         if not self.is_fitted:
             raise ValueError("Model must be fitted before prediction")
-        
+
         all_forecasts = []
-        
+
         if self.is_panel:
             # Predict for each group
             for group_id, model in self.models.items():
@@ -252,7 +259,7 @@ class DartsBackend(BaseBackendModel):
                     group_future = df_future[df_future[self.group_id_col] == group_id]
                     if not group_future.empty:
                         future_covariates = self._convert_covariates_to_timeseries(group_future)
-                
+
                 # Generate forecast
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
@@ -263,23 +270,23 @@ class DartsBackend(BaseBackendModel):
                             forecast = model.predict(n=horizon, **kwargs)
                     else:
                         forecast = model.predict(n=horizon, **kwargs)
-                
+
                 # Convert to DataFrame
                 forecast_df = forecast.to_dataframe().reset_index()
                 forecast_df.columns = ['ds', 'yhat']
                 forecast_df[self.group_id_col] = group_id
                 all_forecasts.append(forecast_df)
-            
+
             result = pd.concat(all_forecasts, ignore_index=True)
         else:
             # Single series
             model = self.models['_single_']
-            
+
             # Prepare future covariates
             future_covariates = None
             if df_future is not None and self.covariates:
                 future_covariates = self._convert_covariates_to_timeseries(df_future)
-            
+
             # Generate forecast
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
@@ -290,25 +297,25 @@ class DartsBackend(BaseBackendModel):
                         forecast = model.predict(n=horizon, **kwargs)
                 else:
                     forecast = model.predict(n=horizon, **kwargs)
-            
+
             # Convert to DataFrame
             result = forecast.to_dataframe().reset_index()
             result.columns = ['ds', 'yhat']
-        
+
         return result
-    
+
     def supports_panel_data(self) -> bool:
         """Darts supports panel data via separate models."""
         return True
-    
+
     def supports_covariates(self) -> bool:
         """Some Darts models support covariates."""
         return True
-    
+
     def supports_probabilistic(self) -> bool:
         """Some Darts models support probabilistic forecasts."""
         return False  # Conservative default
-    
+
     def get_model_info(self) -> Dict[str, Any]:
         """Get Darts model information."""
         info = super().get_model_info()

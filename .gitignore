@@ -1,9 +1,63 @@
-*.ipynb
-test.ipynb
-*.pkl
-/AutogluonModels/
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
 
-# AutoGluon generated outputs
-AutogluonModels/**/logs/
-AutogluonModels/**/lightning_logs/
-AutogluonModels/**/events.out.tfevents.*
+# Build and packaging output
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+MANIFEST
+
+# Test and coverage output
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Virtual environments
+.venv/
+local.venv/
+venv/
+env/
+ENV/
+
+# Generated model and runtime output
+/AutogluonModels/
+/checkpoints/
+/outputs/
+/logs/
+*.log
+*.pkl
+*.joblib
+*.ckpt
+*.pth
+*.onnx
+
+# Local notebooks and scratch artifacts
+*.ipynb
+.claude/
+*.tmp
+*.temp
+*.bak
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+.envrc
+*.key
+*.pem
+secrets.txt
+
+# Editor and OS files
+.vscode/
+.idea/
+*.sublime-*
+*~
+.DS_Store
+Thumbs.db

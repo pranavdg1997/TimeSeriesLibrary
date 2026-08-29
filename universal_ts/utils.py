@@ -256,9 +256,9 @@ def handle_missing_values(
     if method == "drop":
         df = df.dropna(subset=[target_col])
     elif method == "ffill":
-        df[target_col] = df[target_col].fillna(method="ffill")
+        df[target_col] = df[target_col].ffill()
     elif method == "bfill":
-        df[target_col] = df[target_col].fillna(method="bfill")
+        df[target_col] = df[target_col].bfill()
     elif method == "zero":
         df[target_col] = df[target_col].fillna(0)
     elif method == "value":
